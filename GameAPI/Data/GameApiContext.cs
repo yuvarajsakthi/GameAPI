@@ -129,6 +129,51 @@ namespace GameAPI.Data
                 new GameDetail { GameDetailId = 8, GameId = 8, Genre = "Shooter", ReleaseDate = new DateTime(2021, 10, 7), Description = "Cuba-inspired open-world revolution story.", UserId = 2 }
             );
 
+
+
+            // Game
+            modelBuilder.Entity<Game>(entity =>
+            {
+                entity.Property(e => e.Title).HasMaxLength(200);
+            });
+
+            // GameCompany
+            modelBuilder.Entity<GameCompany>(entity =>
+            {
+                entity.Property(e => e.Name).HasMaxLength(150);
+                entity.Property(e => e.HeadQuarter).HasMaxLength(200);
+            });
+
+            // GameDetail
+            modelBuilder.Entity<GameDetail>(entity =>
+            {
+                entity.Property(e => e.Genre).HasMaxLength(100);
+                entity.Property(e => e.Description).HasMaxLength(1000);
+            });
+
+            // Platform
+            modelBuilder.Entity<Platform>(entity =>
+            {
+                entity.Property(e => e.Name).HasMaxLength(100);
+                entity.Property(e => e.Type).HasMaxLength(100);
+            });
+
+            // Publisher
+            modelBuilder.Entity<Publisher>(entity =>
+            {
+                entity.Property(e => e.Name).HasMaxLength(150);
+                entity.Property(e => e.Country).HasMaxLength(100);
+            });
+
+            // User
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.Property(e => e.UserName).HasMaxLength(100);
+                entity.Property(e => e.Email).HasMaxLength(200);
+                entity.Property(e => e.Password).HasMaxLength(200);
+                entity.Property(e => e.Role).HasMaxLength(50);
+            });
+
         }
 
     }
