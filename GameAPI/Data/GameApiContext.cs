@@ -45,27 +45,32 @@ namespace GameAPI.Data
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Games)
                 .WithOne(g => g.User)
-                .HasForeignKey(g => g.UserId);
+                .HasForeignKey(g => g.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.GameCompanies)
                 .WithOne(gc => gc.User)
-                .HasForeignKey(gc => gc.UserId);
+                .HasForeignKey(gc => gc.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Publishers)
                 .WithOne(p => p.User)
-                .HasForeignKey(p => p.UserId);
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Platforms)
                 .WithOne(p => p.User)
-                .HasForeignKey(p => p.UserId);
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.GameDetails)
                 .WithOne(gd => gd.User)
-                .HasForeignKey(gd => gd.UserId);
+                .HasForeignKey(gd => gd.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
             // Users
