@@ -11,7 +11,6 @@ namespace GameAPI.Repositories.Interfaces
         Task<bool> DeleteAsync(int id);
         Task<bool> SaveAsync();
 
-        Task<IEnumerable<T>> SearchAsync(Func<T, bool> predicate);
         Task<IEnumerable<T>> SortAsync<TKey>(Func<T, TKey> keySelector, bool descending = false);
         Task<int> CountAsync(Func<T, bool>? predicate = null);
     }

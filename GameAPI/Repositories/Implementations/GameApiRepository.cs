@@ -54,11 +54,6 @@ namespace GameAPI.Repositories.Implementations
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<IEnumerable<T>> SearchAsync(Func<T, bool> predicate)
-        {
-            return await Task.FromResult(_dbSet.AsEnumerable().Where(predicate));
-        }
-
         public async Task<IEnumerable<T>> SortAsync<TKey>(Func<T, TKey> keySelector, bool descending = false)
         {
             var sorted = descending ? _dbSet.AsEnumerable().OrderByDescending(keySelector)

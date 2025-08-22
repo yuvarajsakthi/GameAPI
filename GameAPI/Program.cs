@@ -15,7 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+});
 
 builder.Services.AddDbContext<GameApiContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("GameConn")));
 
@@ -32,6 +36,9 @@ builder.Services.AddScoped<IPlatform, PlatformRepository>();
 builder.Services.AddScoped<PlatformService>();
 builder.Services.AddScoped<IGameDetail, GameDetailRepository>();
 builder.Services.AddScoped<GameDetailService>();
+
+builder.Services.AddScoped(typeof(IGameApiRepository<>), typeof(GameApiRepository<>));
+builder.Services.AddScoped(typeof(BaseService<>));
 
 // ------------------- Token Service -------------------
 builder.Services.AddScoped<IToken, TokenService>();
