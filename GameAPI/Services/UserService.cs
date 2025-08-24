@@ -16,6 +16,5 @@ namespace GameAPI.Services
 
         public async Task<IEnumerable<User>> GetByRoleAsync(string role) => await _userRepo.GetByRoleAsync(role);
 
-        public async Task<User> AddUserAsync(User user) => await _userRepo.AddAsync(user);
     }
 }

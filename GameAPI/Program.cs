@@ -1,3 +1,4 @@
+using GameAPI.Controllers;
 using GameAPI.Data;
 using GameAPI.Repositories.Implementations;
 using GameAPI.Repositories.Interfaces;
@@ -39,6 +40,8 @@ builder.Services.AddScoped<GameDetailService>();
 
 builder.Services.AddScoped(typeof(IGameApiRepository<>), typeof(GameApiRepository<>));
 builder.Services.AddScoped(typeof(BaseService<>));
+builder.Services.AddScoped<GameApiContext>();
+builder.Services.AddScoped(typeof(BaseController<>), typeof(BaseController<>));
 
 // ------------------- Token Service -------------------
 builder.Services.AddScoped<IToken, TokenService>();

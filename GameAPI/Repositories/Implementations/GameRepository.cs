@@ -5,18 +5,42 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameAPI.Repositories.Implementations
 {
-    public class GameRepository(GameApiContext context) : GameApiRepository<Game>(context), IGame
+    public class GameRepository : GameApiRepository<Game>, IGame
     {
+        private readonly ILogger<GameRepository> _logger;
+
+        public GameRepository(GameApiContext context, ILogger<GameRepository> logger)
+            : base(context, logger)
+        {
+            _logger = logger;
+        }
+
         public async Task<IEnumerable<Game>> GetByCompanyAsync(int companyId)
         {
-            return await _dbSet.Where(g => g.GameCompanyId == companyId).ToListAsync();
+            try
+            {
+                return await _dbSet.Where(g => g.GameCompanyId == companyId).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting games by company ID {CompanyId}", companyId);
+                throw new RepositoryException($"Failed to retrieve games for company ID {companyId}", ex);
+            }
         }
 
         public async Task<IEnumerable<Game>> GetByPlatformAsync(int platformId)
         {
-            return await _dbSet
-                .Where(g => g.Platforms!.Any(p => p.PlatformId == platformId))
-                .ToListAsync();
+            try
+            {
+                return await _dbSet
+                    .Where(g => g.Platforms!.Any(p => p.PlatformId == platformId))
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting games by platform ID {PlatformId}", platformId);
+                throw new RepositoryException($"Failed to retrieve games for platform ID {platformId}", ex);
+            }
         }
     }
 }

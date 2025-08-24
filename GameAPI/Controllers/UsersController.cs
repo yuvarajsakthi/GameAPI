@@ -17,20 +17,12 @@ namespace GameAPI.Controllers
             _userService = userService;
         }
 
-        [HttpGet]
+        [HttpGet("/GetAllUsers")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetByRoleAsync("Admin");
             return Ok(users);
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddUser([FromBody] User user)
-        {
-            var added = await _userService.AddUserAsync(user);
-            return Ok(added);
         }
     }
 }

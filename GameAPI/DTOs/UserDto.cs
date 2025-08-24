@@ -5,7 +5,7 @@
         public string? UserName { get; set; }
         public string? Email { get; set; }
         public string? Password { get; set; }
-        public string? Role { get; set; }  // Admin, Publisher, Viewer
+        public string? Role { get; set; }  // Admin, Company, Viewer
 
         public int? CompanyId { get; set; } // For restricting access
     }
