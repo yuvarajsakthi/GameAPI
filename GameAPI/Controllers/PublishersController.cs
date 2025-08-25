@@ -83,5 +83,35 @@ namespace GameAPI.Controllers
             await _context.DeleteAsync(id);
             return NoContent();
         }
+
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetPublishersCount()
+        {
+            var count = await _context.CountAsync();
+            return Ok(count);
+        }
+
+        [HttpGet("sorted")]
+        public async Task<ActionResult<IEnumerable<Publisher>>> GetSortedPublishers(
+    [FromQuery] string sortBy = "Name",
+    [FromQuery] bool descending = false)
+        {
+            IEnumerable<Publisher> sorted;
+
+            switch (sortBy.ToLower())
+            {
+                case "country":
+                    sorted = await _context.SortAsync(p => p.Country!, descending);
+                    break;
+                case "name":
+                default:
+                    sorted = await _context.SortAsync(p => p.Name!, descending);
+                    break;
+            }
+
+            return Ok(sorted);
+        }
+
+
     }
 }

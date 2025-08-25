@@ -71,5 +71,13 @@ namespace GameAPI.Controllers
             await _context.DeleteAsync(id);
             return NoContent();
         }
+
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetPublishersCount()
+        {
+            var count = await _context.CountAsync();
+            return Ok(count);
+        }
+
     }
 }
