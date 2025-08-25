@@ -1,37 +1,73 @@
-﻿using GameAPI.Models;
-using GameAPI.Services;
-using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using GameAPI.Data;
+using GameAPI.Models;
+using GameAPI.Services;
 
 namespace GameAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GamesController : BaseController<Game>
+    public class GamesController : ControllerBase
     {
-        private readonly GameService _gameService;
+        private readonly BaseService<Game> _context;
 
-        public GamesController(GameService gameService) : base(gameService)
+        public GamesController(BaseService<Game> context)
         {
-            _gameService = gameService;
+            _context = context;
         }
 
-        [HttpGet("company/{companyId}")]
-        [Authorize(Roles = "Admin,Company")]
-        public async Task<IActionResult> GetByCompany(int companyId)
+        [HttpGet]
+        public async Task<IEnumerable<Game>> GetGames()
         {
-            var games = await _gameService.GetByCompanyAsync(companyId);
-            return Ok(games);
+            return await _context.GetAllAsync();
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Game>> GetGame(int id)
+        {
+            var game = await _context.GetByIdAsync(id);
+
+            if (game == null)
+            {
+                return NotFound();
+            }
+
+            return game;
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutGame(int id, Game game)
+        {
+            if (id != game.GameId)
+            {
+                return BadRequest();
+            }
+
+            await _context.UpdateAsync(game);
+
+            return NoContent();
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin,Company")]
-        public async Task<IActionResult> AddGame([FromBody] Game game)
+        public async Task<ActionResult<Game>> PostGame(Game game)
         {
-            // You can verify that the UserId matches the current user for company users
-            var added = await _gameService.AddGameAsync(game);
-            return Ok(added);
+            await _context.AddAsync(game);
+
+            return CreatedAtAction("GetGame", new { id = game.GameId }, game);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteGame(int id)
+        {
+            await _context.DeleteAsync(id);
+
+            return NoContent();
         }
     }
 }

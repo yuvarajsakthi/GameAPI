@@ -1,33 +1,75 @@
-﻿using GameAPI.Models;
-using GameAPI.Services;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using GameAPI.Data;
+using GameAPI.Models;
+using GameAPI.Services;
 
 namespace GameAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GameDetailsController : BaseController<GameDetail>
+    public class GameDetailsController : ControllerBase
     {
-        private readonly GameDetailService _service;
+        private readonly BaseService<GameDetail> _context;
 
-        public GameDetailsController(GameDetailService service) : base(service) 
+        public GameDetailsController(BaseService<GameDetail> context)
         {
-            _service = service;
+            _context = context;
         }
 
-        [HttpGet("released-after/{date}")]
-        public async Task<IActionResult> GetReleasedAfter(DateTime date)
+        [HttpGet]
+        public async Task<IEnumerable<GameDetail>> GetGameDetails()
         {
-            var details = await _service.GetReleasedAfterAsync(date);
-            return Ok(details);
+            return await _context.GetAllAsync();
         }
 
-        [HttpGet("genre/{genre}")]
-        public async Task<IActionResult> GetByGenre(string genre)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<GameDetail>> GetGameDetail(int id)
         {
-            var details = await _service.GetByGenreAsync(genre);
-            return Ok(details);
+            var gameDetail = await _context.GetByIdAsync(id);
+
+            if (gameDetail == null)
+            {
+                return NotFound();
+            }
+
+            return gameDetail;
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutGameDetail(int id, GameDetail gameDetail)
+        {
+            if (id != gameDetail.GameDetailId)
+            {
+                return BadRequest();
+            }
+
+            await _context.UpdateAsync(gameDetail);
+
+            return NoContent();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<GameDetail>> PostGameDetail(GameDetail gameDetail)
+        {
+           
+            await _context.AddAsync(gameDetail);
+
+            return CreatedAtAction("GetGameDetail", new { id = gameDetail.GameDetailId }, gameDetail);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteGameDetail(int id)
+        {
+            await _context.DeleteAsync(id);
+
+            return NoContent();
+        }
+
     }
 }

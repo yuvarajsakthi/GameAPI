@@ -1,5 +1,6 @@
 using GameAPI.Controllers;
 using GameAPI.Data;
+using GameAPI.Models;
 using GameAPI.Repositories.Implementations;
 using GameAPI.Repositories.Interfaces;
 using GameAPI.Services;
@@ -17,31 +18,24 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddDbContext<GameApiContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("GameConn")));
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 });
 
-builder.Services.AddDbContext<GameApiContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("GameConn")));
-
 // ------------------- Repositories -------------------
 builder.Services.AddScoped<IUser, UserRepository>();
+builder.Services.AddScoped<IGameApiRepository<User>, UserRepository>();
+builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<IGame, GameRepository>();
-builder.Services.AddScoped<GameService>();
-builder.Services.AddScoped<IGameCompany, GameCompanyRepository>();
-builder.Services.AddScoped<GameCompanyService>();
-builder.Services.AddScoped<IPublisher, PublisherRepository>();
-builder.Services.AddScoped<PublisherService>();
-builder.Services.AddScoped<IPlatform, PlatformRepository>();
-builder.Services.AddScoped<PlatformService>();
-builder.Services.AddScoped<IGameDetail, GameDetailRepository>();
-builder.Services.AddScoped<GameDetailService>();
+builder.Services.AddScoped<IGameApiRepository<Game>, GameApiRepository<Game>>();
+builder.Services.AddScoped<IGameApiRepository<GameCompany>, GameApiRepository<GameCompany>>();
+builder.Services.AddScoped<IGameApiRepository<GameDetail>, GameApiRepository<GameDetail>>();
+builder.Services.AddScoped<IGameApiRepository<Platform>, GameApiRepository<Platform>>();
+builder.Services.AddScoped<IGameApiRepository<Publisher>, GameApiRepository<Publisher>>();
 
-builder.Services.AddScoped(typeof(IGameApiRepository<>), typeof(GameApiRepository<>));
-builder.Services.AddScoped(typeof(BaseService<>));
-builder.Services.AddScoped<GameApiContext>();
-builder.Services.AddScoped(typeof(BaseController<>), typeof(BaseController<>));
 
 // ------------------- Token Service -------------------
 builder.Services.AddScoped<IToken, TokenService>();
