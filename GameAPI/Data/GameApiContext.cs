@@ -5,12 +5,12 @@ namespace GameAPI.Data
 {
     public class GameApiContext(DbContextOptions<GameApiContext> options) : DbContext(options)
     {
-        public DbSet<User> Users { get; set; }
-        public DbSet<GameCompany> GameCompanies { get; set; }
-        public DbSet<Publisher> Publishers { get; set; }
-        public DbSet<Platform> Platforms { get; set; }
-        public DbSet<Game> Games { get; set; }
-        public DbSet<GameDetail> GameDetails { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<GameCompany> GameCompanies { get; set; }
+        public virtual DbSet<Publisher> Publishers { get; set; }
+        public virtual DbSet<Platform> Platforms { get; set; }
+        public virtual DbSet<Game> Games { get; set; }
+        public virtual DbSet<GameDetail> GameDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
