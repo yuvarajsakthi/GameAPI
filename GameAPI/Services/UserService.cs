@@ -1,16 +1,22 @@
-﻿using GameAPI.Models;
+﻿using AutoMapper;
+using GameAPI.DTOs;
+using GameAPI.Models;
 using GameAPI.Repositories.Implementations;
 using GameAPI.Repositories.Interfaces;
+using NuGet.Protocol.Core.Types;
 
 namespace GameAPI.Services
 {
     public class UserService
     {
         private readonly UserRepository _userRepo;
+        protected readonly IMapper _mapper;
 
-        public UserService(UserRepository userRepo)
+        public UserService(UserRepository userRepo, IMapper mapper)
         {
             _userRepo = userRepo;
+            _mapper = mapper;
+
         }
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
@@ -33,14 +39,22 @@ namespace GameAPI.Services
             return await _userRepo.GetByRoleAsync(role);
         }
 
-        public async Task<User> CreateUserAsync(User user)
+        public async Task<User> CreateUserAsync(UserDto userDto)
         {
-            if (await _userRepo.GetByEmailAsync(user.Email!) != null)
+            if (await _userRepo.GetByEmailAsync(userDto.Email!) != null)
             {
-                throw new InvalidOperationException($"User with email '{user.Email}' already exists.");
+                throw new InvalidOperationException($"User with email '{userDto.Email}' already exists.");
             }
 
-            return await _userRepo.AddAsync(user);
+            var newUser = new User
+            {
+                UserName = userDto.UserName,
+                Email = userDto.Email,
+                Password = userDto.Password,
+                Role = userDto.Role
+            };
+
+            return await _userRepo.AddAsync(newUser);
         }
 
         public async Task<User> UpdateUserAsync(User user)
@@ -83,6 +97,12 @@ namespace GameAPI.Services
         public async Task<bool> EmailExistsAsync(string email)
         {
             return await _userRepo.GetByEmailAsync(email) != null;
+        }
+
+        public async Task<User> AddFromDtoAsync<TDto>(TDto dto)
+        {
+            var entity = _mapper.Map<User>(dto);
+            return await _userRepo.AddAsync(entity);
         }
 
     }

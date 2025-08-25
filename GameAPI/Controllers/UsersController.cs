@@ -1,4 +1,5 @@
-﻿using GameAPI.Models;
+﻿using GameAPI.DTOs;
+using GameAPI.Models;
 using GameAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -92,22 +93,17 @@ namespace GameAPI.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous] // Typically registration is open to all
-        public async Task<IActionResult> CreateUser([FromBody] User user)
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateUser([FromBody] UserDto userDto)
         {
             try
             {
                 if (!ModelState.IsValid)
-                {
                     return BadRequest(ModelState);
-                }
 
-                var createdUser = await _userService.CreateUserAsync(user);
-                return CreatedAtAction(nameof(GetUserById), new { id = createdUser.UserId }, createdUser);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
+                var createdUser = await _userService.AddFromDtoAsync(userDto);
+
+                return CreatedAtAction(nameof(GetUserById), new { id = (createdUser as User)!.UserId }, createdUser);
             }
             catch (Exception ex)
             {

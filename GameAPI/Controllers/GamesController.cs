@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GameAPI.Data;
+﻿using AutoMapper;
+using GameAPI.DTOs;
 using GameAPI.Models;
 using GameAPI.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GameAPI.Controllers
 {
@@ -15,39 +10,37 @@ namespace GameAPI.Controllers
     [ApiController]
     public class GamesController : ControllerBase
     {
-        private readonly BaseService<Game> _context;
+        private readonly GameApiService<Game> _context;
+        private readonly IMapper _mapper;
 
-        public GamesController(BaseService<Game> context)
+        public GamesController(GameApiService<Game> context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<Game>> GetGames()
+        public async Task<IEnumerable<GameDto>> GetGames()
         {
-            return await _context.GetAllAsync();
+            var games = await _context.GetAllAsync();
+            return _mapper.Map<IEnumerable<GameDto>>(games);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Game>> GetGame(int id)
+        public async Task<ActionResult<GameDto>> GetGame(int id)
         {
             var game = await _context.GetByIdAsync(id);
 
-            if (game == null)
-            {
-                return NotFound();
-            }
+            if (game == null) return NotFound();
 
-            return game;
+            return _mapper.Map<GameDto>(game);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutGame(int id, Game game)
+        public async Task<IActionResult> PutGame(int id, GameDto gameDto)
         {
-            if (id != game.GameId)
-            {
-                return BadRequest();
-            }
+            var game = _mapper.Map<Game>(gameDto);
+            game.GameId = id; // ensure correct Id
 
             await _context.UpdateAsync(game);
 
@@ -55,18 +48,20 @@ namespace GameAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Game>> PostGame(Game game)
+        public async Task<ActionResult<GameDto>> PostGame(GameDto gameDto)
         {
+            var game = _mapper.Map<Game>(gameDto);
             await _context.AddAsync(game);
 
-            return CreatedAtAction("GetGame", new { id = game.GameId }, game);
+            var resultDto = _mapper.Map<GameDto>(game);
+
+            return CreatedAtAction("GetGame", new { id = game.GameId }, resultDto);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGame(int id)
         {
             await _context.DeleteAsync(id);
-
             return NoContent();
         }
     }

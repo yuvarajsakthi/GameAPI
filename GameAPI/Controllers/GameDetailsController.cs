@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GameAPI.Data;
+﻿using AutoMapper;
+using GameAPI.DTOs;
 using GameAPI.Models;
 using GameAPI.Services;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GameAPI.Controllers
 {
@@ -15,61 +10,59 @@ namespace GameAPI.Controllers
     [ApiController]
     public class GameDetailsController : ControllerBase
     {
-        private readonly BaseService<GameDetail> _context;
+        private readonly GameApiService<GameDetail> _context;
+        private readonly IMapper _mapper;
 
-        public GameDetailsController(BaseService<GameDetail> context)
+        public GameDetailsController(GameApiService<GameDetail> context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<GameDetail>> GetGameDetails()
+        public async Task<IEnumerable<GameDetailDto>> GetGameDetails()
         {
-            return await _context.GetAllAsync();
+            var details = await _context.GetAllAsync();
+            return _mapper.Map<IEnumerable<GameDetailDto>>(details);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<GameDetail>> GetGameDetail(int id)
+        public async Task<ActionResult<GameDetailDto>> GetGameDetail(int id)
         {
-            var gameDetail = await _context.GetByIdAsync(id);
+            var detail = await _context.GetByIdAsync(id);
 
-            if (gameDetail == null)
-            {
-                return NotFound();
-            }
+            if (detail == null) return NotFound();
 
-            return gameDetail;
+            return _mapper.Map<GameDetailDto>(detail);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutGameDetail(int id, GameDetail gameDetail)
+        public async Task<IActionResult> PutGameDetail(int id, GameDetailDto dto)
         {
-            if (id != gameDetail.GameDetailId)
-            {
-                return BadRequest();
-            }
+            var detail = _mapper.Map<GameDetail>(dto);
+            detail.GameDetailId = id;
 
-            await _context.UpdateAsync(gameDetail);
+            await _context.UpdateAsync(detail);
 
             return NoContent();
         }
 
         [HttpPost]
-        public async Task<ActionResult<GameDetail>> PostGameDetail(GameDetail gameDetail)
+        public async Task<ActionResult<GameDetailDto>> PostGameDetail(GameDetailDto dto)
         {
-           
-            await _context.AddAsync(gameDetail);
+            var detail = _mapper.Map<GameDetail>(dto);
+            await _context.AddAsync(detail);
 
-            return CreatedAtAction("GetGameDetail", new { id = gameDetail.GameDetailId }, gameDetail);
+            var resultDto = _mapper.Map<GameDetailDto>(detail);
+
+            return CreatedAtAction("GetGameDetail", new { id = detail.GameDetailId }, resultDto);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGameDetail(int id)
         {
             await _context.DeleteAsync(id);
-
             return NoContent();
         }
-
     }
 }

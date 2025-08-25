@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GameAPI.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using GameAPI.Models;
 using GameAPI.Services;
+using GameAPI.DTOs;
+using AutoMapper;
 
 namespace GameAPI.Controllers
 {
@@ -15,21 +10,26 @@ namespace GameAPI.Controllers
     [ApiController]
     public class PublishersController : ControllerBase
     {
-        private readonly BaseService<Publisher> _context;
+        private readonly GameApiService<Publisher> _context;
+        private readonly IMapper _mapper;
 
-        public PublishersController(BaseService<Publisher> context)
+        public PublishersController(GameApiService<Publisher> context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
+        // GET: api/Publishers
         [HttpGet]
-        public async Task<IEnumerable<Publisher>> GetPublishers()
+        public async Task<IEnumerable<PublisherDto>> GetPublishers()
         {
-            return await _context.GetAllAsync();
+            var publishers = await _context.GetAllAsync();
+            return _mapper.Map<IEnumerable<PublisherDto>>(publishers);
         }
 
+        // GET: api/Publishers/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Publisher>> GetPublisher(int id)
+        public async Task<ActionResult<PublisherDto>> GetPublisher(int id)
         {
             var publisher = await _context.GetByIdAsync(id);
 
@@ -38,35 +38,49 @@ namespace GameAPI.Controllers
                 return NotFound();
             }
 
-            return publisher;
+            return _mapper.Map<PublisherDto>(publisher);
         }
 
+        // PUT: api/Publishers/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPublisher(int id, Publisher publisher)
+        public async Task<IActionResult> PutPublisher(int id, PublisherDto publisherDto)
         {
-            if (id != publisher.PublisherId)
+            var publisher = await _context.GetByIdAsync(id);
+            if (publisher == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
+            // map incoming DTO → existing entity
+            _mapper.Map(publisherDto, publisher);
             await _context.UpdateAsync(publisher);
 
             return NoContent();
         }
 
+        // POST: api/Publishers
         [HttpPost]
-        public async Task<ActionResult<Publisher>> PostPublisher(Publisher publisher)
+        public async Task<ActionResult<PublisherDto>> PostPublisher(PublisherDto publisherDto)
         {
+            var publisher = _mapper.Map<Publisher>(publisherDto);
             await _context.AddAsync(publisher);
 
-            return CreatedAtAction("GetPublisher", new { id = publisher.PublisherId }, publisher);
+            return CreatedAtAction(nameof(GetPublisher),
+                new { id = publisher.PublisherId },
+                _mapper.Map<PublisherDto>(publisher));
         }
 
+        // DELETE: api/Publishers/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePublisher(int id)
         {
-            await _context.DeleteAsync(id);
+            var publisher = await _context.GetByIdAsync(id);
+            if (publisher == null)
+            {
+                return NotFound();
+            }
 
+            await _context.DeleteAsync(id);
             return NoContent();
         }
     }

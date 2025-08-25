@@ -25,17 +25,17 @@ builder.Services.AddSwaggerGen(options =>
     options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 });
 
-// ------------------- Repositories -------------------
+// Generic registrations
+builder.Services.AddScoped(typeof(IGameApiRepository<>), typeof(GameApiRepository<>));
+builder.Services.AddScoped(typeof(GameApiService<>));
+
+// Special cases
 builder.Services.AddScoped<IUser, UserRepository>();
-builder.Services.AddScoped<IGameApiRepository<User>, UserRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<IGameApiRepository<Game>, GameApiRepository<Game>>();
-builder.Services.AddScoped<IGameApiRepository<GameCompany>, GameApiRepository<GameCompany>>();
-builder.Services.AddScoped<IGameApiRepository<GameDetail>, GameApiRepository<GameDetail>>();
-builder.Services.AddScoped<IGameApiRepository<Platform>, GameApiRepository<Platform>>();
-builder.Services.AddScoped<IGameApiRepository<Publisher>, GameApiRepository<Publisher>>();
 
+// Mapper register
+builder.Services.AddAutoMapper(typeof(Program));
 
 // ------------------- Token Service -------------------
 builder.Services.AddScoped<IToken, TokenService>();
